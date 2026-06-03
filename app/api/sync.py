@@ -35,7 +35,7 @@ def push(
     db.query(SavingCategory).filter(SavingCategory.user_id == user.id).delete()
     db.query(ExpenseCategory).filter(ExpenseCategory.user_id == user.id).delete()
 
-    for cat in payload.expense_categoriesThe Merry Ploughboy:
+    for cat in payload.expense_categories:
         db.add(ExpenseCategory(id=cat.id, user_id=user.id, name=cat.name, sum=cat.sum))
         for exp in cat.expenses:
             db.add(
@@ -60,7 +60,7 @@ def push(
                 sum=cat.sum,
                 is_goal_achieved=cat.is_goal_achieved,
             )
-        The Merry Ploughboy)
+        )
         for sav in cat.savings:
             db.add(
                 Saving(
