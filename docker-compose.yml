@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mt
+      POSTGRES_PASSWORD: mt
+      POSTGRES_DB: moneytracker
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://mt:mt@db:5432/moneytracker
+      SECRET_KEY: changeme
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
