@@ -2,9 +2,10 @@
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey, Text
+
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
@@ -28,28 +29,32 @@ class User(Base):
 class ExpenseCategory(Base):
     """
     A user-defined category that groups related expenses (e.g. "Food", "Rent").
+
+    ``sum`` mirrors the aggregated total maintained by the mobile app and is
+    stored as-is during push so it can be restored on pull without recalculating.
     """
 
     __tablename__ = 'expense_category'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(BigInteger, primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     name = Column(String(100), nullable=False)
+    sum = Column(Float, nullable=False, default=0.0)
 
 
 class Expense(Base):
     """
     A single expense entry belonging to an ExpenseCategory.
 
-    The ``description`` field is optional and may be used by the mobile app
-    for additional notes.
+    Amounts are negative (as stored by the mobile app). The optional
+    ``description`` field may carry additional notes from the user.
     """
 
     __tablename__ = 'expense'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(BigInteger, primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    category_id = Column(UUID(as_uuid=True), ForeignKey('expense_category.id'), nullable=False)
+    category_id = Column(BigInteger, ForeignKey('expense_category.id'), nullable=False)
 
     title = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
@@ -61,28 +66,30 @@ class SavingCategory(Base):
     """
     A user-defined savings goal category (e.g. "Vacation", "Emergency fund").
 
-    ``goal`` is the target amount. ``is_goal_achieved`` is set by the mobile
-    app once the accumulated savings reach that target.
+    ``goal`` is the target amount, ``sum`` is the current total deposited.
+    ``is_goal_achieved`` is set by the mobile app once the goal is reached.
+    Both aggregates are stored as-is to allow full state restoration on pull.
     """
 
     __tablename__ = 'saving_category'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(BigInteger, primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
 
     name = Column(String(100), nullable=False)
     goal = Column(Float, nullable=False)
+    sum = Column(Float, nullable=False, default=0.0)
     is_goal_achieved = Column(Boolean, default=False)
 
 
 class Saving(Base):
-    """A single saving entry (deposit) belonging to a SavingCategory."""
+    """A single saving deposit entry belonging to a SavingCategory."""
 
     __tablename__ = 'saving'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(BigInteger, primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    category_id = Column(UUID(as_uuid=True), ForeignKey('saving_category.id'), nullable=False)
+    category_id = Column(BigInteger, ForeignKey('saving_category.id'), nullable=False)
 
     title = Column(String(100), nullable=False)
     amount = Column(Float, nullable=False)

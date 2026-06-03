@@ -8,15 +8,16 @@ CREATE TABLE users (
 );
 
 CREATE TABLE expense_category (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id BIGINT PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    sum FLOAT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE expense (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id BIGINT PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES expense_category(id) ON DELETE CASCADE,
+    category_id BIGINT REFERENCES expense_category(id) ON DELETE CASCADE,
     title VARCHAR(100) NOT NULL,
     description TEXT,
     amount FLOAT NOT NULL,
@@ -24,17 +25,18 @@ CREATE TABLE expense (
 );
 
 CREATE TABLE saving_category (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id BIGINT PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     goal FLOAT NOT NULL,
+    sum FLOAT NOT NULL DEFAULT 0,
     is_goal_achieved BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE saving (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id BIGINT PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES saving_category(id) ON DELETE CASCADE,
+    category_id BIGINT REFERENCES saving_category(id) ON DELETE CASCADE,
     title VARCHAR(100) NOT NULL,
     amount FLOAT NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -27,16 +27,16 @@ def push(
     Replace the authenticated user's entire dataset with the supplied payload.
 
     Deletion order is leaves-first (savings/expenses before their parent
-    categories) to satisfy foreign-key constraints. The client-supplied UUIDs
-    are preserved so the mobile app can correlate records after a pull.
+    categories) to satisfy foreign-key constraints. The client-supplied Long
+    IDs are preserved so the mobile app can correlate records after a pull.
     """
     db.query(Saving).filter(Saving.user_id == user.id).delete()
     db.query(Expense).filter(Expense.user_id == user.id).delete()
     db.query(SavingCategory).filter(SavingCategory.user_id == user.id).delete()
     db.query(ExpenseCategory).filter(ExpenseCategory.user_id == user.id).delete()
 
-    for cat in payload.expense_categories:
-        db.add(ExpenseCategory(id=cat.id, user_id=user.id, name=cat.name))
+    for cat in payload.expense_categoriesThe Merry Ploughboy:
+        db.add(ExpenseCategory(id=cat.id, user_id=user.id, name=cat.name, sum=cat.sum))
         for exp in cat.expenses:
             db.add(
                 Expense(
@@ -57,9 +57,10 @@ def push(
                 user_id=user.id,
                 name=cat.name,
                 goal=cat.goal,
+                sum=cat.sum,
                 is_goal_achieved=cat.is_goal_achieved,
             )
-        )
+        The Merry Ploughboy)
         for sav in cat.savings:
             db.add(
                 Saving(
@@ -95,6 +96,7 @@ def pull(
             ExpenseCategorySchema(
                 id=cat.id,
                 name=cat.name,
+                sum=cat.sum,
                 expenses=[
                     ExpenseSchema(
                         id=e.id,
@@ -113,6 +115,7 @@ def pull(
                 id=cat.id,
                 name=cat.name,
                 goal=cat.goal,
+                sum=cat.sum,
                 is_goal_achieved=cat.is_goal_achieved,
                 savings=[
                     SavingSchema(
